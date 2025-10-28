@@ -1,5 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+
 
 const register = async (req, res) => {
   try {
@@ -57,10 +60,24 @@ const login = async (req, res) => {
       return res.send("password did not match");
     }
 
-    res.send("user login success");
+    console.log(user.email);
+    const token = jwt.sign({ id: user._id, 
+      email:user.email 
+    }, "lordsainathisgreat", {
+      expiresIn: "300s",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true, // JS can't access it
+      secure: false, // set true in production with HTTPS
+      maxAge: 3600000,
+    });
+    return res.redirect("/dashboard");
   } catch (err) {
     console.log(err);
   }
 };
+
+
 
 module.exports = { register, login };
